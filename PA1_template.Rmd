@@ -61,9 +61,11 @@ plot.ts(plot3)
 
 ```{r computetime,echo=FALSE}
 maxidx <- which.max(plot3)
+idx <- names(aa[maxidx,1])
 maxval <- max(plot3)
 ```
-The maximum of `r maxval` is at the index `r maxidx` 
+The index `r idx` of 5-minute interval, on average across all the days in the dataset, contains the maximum number `r maxval` of steps
+
 
 ## Imputing missing values
 
