@@ -131,9 +131,13 @@ dfc$wd <- weekdays(dfc$date)
 drw <- lapply(dfc$wd, function(x) ifelse(x =="Saturday" || x == "Sunday" , "weekend","weekday"))
 dfwa <- c(do.call("cbind",drw))
 dfc <-cbind(dfc,dfwa)
-dfc$dfwa <- as.factor(dfc$dfwa)
+dfc <- transform(dfc, interval = factor(interval), steps = factor(steps))
+#dfc$dfwa <- as.factor(dfc$dfwa)
 
+library(doBy)
 library(lattice)
-xyplot(dfc$steps ~ dfc$interval  | dfc$dfwa ,layout = c(1,2), type="l", xlab = "Interval", ylab = "Number of steps")
+plot4 <- summaryBy( steps ~ interval + dfwa , data=dfc, FUN=c(sum))
+names(plot4) <- c("5 Min interval","weekday / weekend" , "summary")
+xyplot(plot4$summary ~ plot4$"5 Min interval"  | plot4$"weekday / weekend" ,layout = c(1,2), type="l", xlab = "Interval", ylab = "Number of steps")
 ```
 
