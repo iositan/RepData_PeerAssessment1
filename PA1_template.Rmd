@@ -9,7 +9,7 @@ output: html_document
      In order to see this html file paste in your browser the following link
      http://htmlpreview.github.io/?https://raw.githubusercontent.com/iositan/RepData_PeerAssessment1/master/PA1_template.html
 -->
-```{r,echo=FALSE}
+```{r libraries}
 #clean and loading required libraries
 rm(list =ls())
 library(knitr)
@@ -20,7 +20,7 @@ library(xtable)
     Here we are ensuring the echo is always ON 
     This code is hidden in HTML output -->
     
-```{r setoptions, echo=FALSE}
+```{r setoptions}
 opts_chunk$set(echo =  TRUE, results ="asis")
 options(digits =3)
 ```
@@ -126,3 +126,14 @@ print(xtable(hist1c[2:3]),type="html")
 ``` 
 
 ## Are there differences in activity patterns between weekdays and weekends? ##
+```{r differences}
+dfc$wd <- weekdays(dfc$date)
+drw <- lapply(dfc$wd, function(x) ifelse(x =="Saturday" || x == "Sunday" , "weekend","weekday"))
+dfwa <- c(do.call("cbind",drw))
+dfc <-cbind(dfc,dfwa)
+dfc$dfwa <- as.factor(dfc$dfwa)
+
+library(lattice)
+xyplot(dfc$steps ~ dfc$interval  | dfc$dfwa ,layout = c(1,2), type="l", xlab = "Interval", ylab = "Number of steps")
+```
+
