@@ -1,11 +1,17 @@
 # Reproducible Research: Peer Assessment 1
 ---
 **Title: "Reproductible Research - First Assignment"**  
-author: *"Iosif Tanasescu" !*  
+author: *"Iosif Tanasescu"*  
 date: "Sunday, August 10, 2014"  
 output: html_document  
 ---
+<!--
+     In order to see this html file paste in your browser the following link
+     http://htmlpreview.github.io/?https://raw.githubusercontent.com/iositan/RepData_PeerAssessment1/master/PA1_template.html
+-->
 ```{r,echo=FALSE}
+#clean and loading required libraries
+rm(list =ls())
 library(knitr)
 library(xtable)
 ```
@@ -16,6 +22,7 @@ library(xtable)
     
 ```{r setoptions, echo=FALSE}
 opts_chunk$set(echo =  TRUE, results ="asis")
+options(digits =3)
 ```
 
 ## Loading and preprocessing the data  
@@ -24,16 +31,15 @@ First we read from the zip file the activity.csv file which contains our data.
 Then we convert the date colum from string to date type  
 <!--Finally discard the NA cases-->
 
-```{r}
+```{r read_data}
 df <- read.csv(unz("activity.zip","activity.csv"), header =TRUE, sep=",")
 df$date <- as.Date(df$date,"%Y-%m-%d")
-#df <-df[complete.cases(df),]
 ```
 
 ## What is mean total number of steps taken per day?
 
 Histogram of summary of steps by day  
-```{r}
+```{r plot_histogram}
 aa<- as.data.frame(tapply(df$steps, df$date , sum, ns.rm=TRUE))
 names(aa) <- c("summary") 
 hist2 <- cbind(date=rownames(aa),aa)
@@ -41,34 +47,82 @@ hist(hist2$summary, xlab="Summary of steps by day", main="Histogram of summary o
 ```
 
 Mean and median by day  
-```{r}
+```{r mean_and_median_by_day}
+# compute the mean
 aa<- as.data.frame(tapply(df$steps, df$date , mean, na.rm=TRUE))
+# compute the median
 aa <- cbind(aa,  tapply(df$steps, df$date , median, na.rm=TRUE))
-names(aa) <- c("daily_mean","daily_median") 
+# Settings names for the columns
+names(aa) <- c("Daily Mean","Daily Median") 
+# Building the data frame 
 hist1 <- cbind(date=rownames(aa),aa)
 #print(xtable(hist1[2:3]))
+# printing in the HTML format
 print(xtable(hist1[2:3]),type="html")
 ```
 
 ## What is the average daily activity pattern?
-```{r}
-aa <- as.data.frame(tapply(df$steps,df$interval,mean, na.rm=TRUE))
-names(aa) <- c("average_5")
+```{r mean_by_steps}
+# compute the mean by steps 
+am <- as.data.frame(tapply(df$steps,df$interval,mean, na.rm=TRUE))
+names(am) <- c("average_5")
 #aa <- cbind(time=rownames(aa),aa)
-plot3 <- as.ts(as.matrix(aa))
+#  build our time serie
+plot3 <- as.ts(as.matrix(am))
 plot.ts(plot3)
 ```
 
-```{r computetime,echo=FALSE}
+```{r computetime,results=FALSE}
+# find out the maximum and associated step
 maxidx <- which.max(plot3)
-idx <- names(aa[maxidx,1])
+idx <- names(am[maxidx,1])
 maxval <- max(plot3)
 ```
-The index `r idx` of 5-minute interval, on average across all the days in the dataset, contains the maximum number `r maxval` of steps
+The **index `r idx` of 5-minute interval** (the `r maxidx` x value), on average across all the days in the dataset, contains the **maximum number `r maxval`** of steps
 
 
 ## Imputing missing values
 
+```{r missing_values}
+# Missing Values section ---
+# Find how many missing rows are in ther initial 
+missing <- sum(is.na(df))
+# which is
+#missing <- nrow(df) - nrow(df[complete.cases(df),])
+```
+There are **`r missing` rows** in the initial dataset with data missing
 
+We will fill the missing values as follows:  
+  - in the steps column, we will replace the NA with 0
+```{r Nas,results=FALSE}
+# simply replacement 
+dfc <- df ; dfc[is.na(dfc)] <- 0
 
-## Are there differences in activity patterns between weekdays and weekends?
+# a litle bit more sofisticated
+#
+# prepare the means results
+#cam <- am ;cam$interval <- rownames(cam)
+#rownames(cam) <- 1:nrow(cam)
+#dfc <- df ;
+#dfc$steps[is.na(dfc$steps)] <- cam$average_5[cam$interval == dfc$interval]
+
+aac<- as.data.frame(tapply(dfc$steps, dfc$date , sum, ns.rm=TRUE))
+names(aac) <- c("summary") 
+hist2c <- cbind(date=rownames(aac),aac)
+hist(hist2c$summary, xlab="Altered Summary of steps by day", main="Histogram of altered summary of steps on a daily basis",col="blue")
+
+aac<- as.data.frame(tapply(dfc$steps, dfc$date , mean, na.rm=TRUE))
+# compute the median
+aac <- cbind(aac,  tapply(dfc$steps, dfc$date , median, na.rm=TRUE))
+# Settings names for the columns
+names(aac) <- c("Daily Mean","Daily Median") 
+# Building the data frame 
+hist1c <- cbind(date=rownames(aac),aac)
+# printing in the HTML format
+```
+
+```{r t,comments=FALSE}
+print(xtable(hist1c[2:3]),type="html")
+``` 
+
+## Are there differences in activity patterns between weekdays and weekends? ##
