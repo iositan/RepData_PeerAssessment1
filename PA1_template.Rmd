@@ -43,7 +43,7 @@ hist(hist2$summary, xlab="Summary of steps by day", main="Histogram of summary o
 Mean and median by day  
 ```{r}
 aa<- as.data.frame(tapply(df$steps, df$date , mean, na.rm=TRUE))
-aa <- cbind(aa,                  tapply(df$steps, df$date , median, na.rm=TRUE))
+aa <- cbind(aa,  tapply(df$steps, df$date , median, na.rm=TRUE))
 names(aa) <- c("daily_mean","daily_median") 
 hist1 <- cbind(date=rownames(aa),aa)
 #print(xtable(hist1[2:3]))
@@ -51,8 +51,19 @@ print(xtable(hist1[2:3]),type="html")
 ```
 
 ## What is the average daily activity pattern?
+```{r}
+aa <- as.data.frame(tapply(df$steps,df$interval,mean, na.rm=TRUE))
+names(aa) <- c("average_5")
+#aa <- cbind(time=rownames(aa),aa)
+plot3 <- as.ts(as.matrix(aa))
+plot.ts(plot3)
+```
 
-
+```{r computetime,echo=FALSE}
+maxidx <- which.max(plot3)
+maxval <- max(plot3)
+```
+The maximum of `r maxval` is at the index `r maxidx` 
 
 ## Imputing missing values
 
